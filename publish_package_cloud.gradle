@@ -1,0 +1,22 @@
+apply plugin: 'maven-publish'
+apply plugin: 'maven'
+
+configurations {
+	deployerJars
+}
+
+dependencies {
+	deployerJars "io.packagecloud.maven.wagon:maven-packagecloud-wagon:0.0.6"
+}
+
+uploadArchives {
+	repositories.mavenDeployer {
+		pom.groupId = project.group
+		pom.artifactId = project.name
+		pom.version = project.version
+		configuration = configurations.deployerJars
+		repository(url: "packagecloud+https://packagecloud.io/Amauri/release") {
+			authentication(password: '99ebf2c14de72c3b8fb3ed8541d4e5031ff6793e15aa206b')
+		}
+	}
+}
