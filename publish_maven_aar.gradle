@@ -9,7 +9,7 @@ publishing {
 	publications {
 		maven(MavenPublication) {
 
-			from components.aar
+			from components.java
 			artifact sourceJar
 
 			pom.withXml {
