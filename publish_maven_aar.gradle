@@ -1,36 +1,16 @@
 apply plugin: 'maven-publish'
 
-task androidJavadocs(type: Javadoc) {
-	source = android.sourceSets.main.java.srcDirs
-	classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
-	android.libraryVariants.all { variant ->
-		if (variant.name == 'release') {
-			owner.classpath += variant.javaCompile.classpath
-		}
-	}
-	exclude '**/R.html', '**/R.*.html', '**/index.html'
-}
-
-task androidJavadocsJar(type: Jar, dependsOn: androidJavadocs) {
-	classifier = 'javadoc'
-	from androidJavadocs.destinationDir
-}
-
-task androidSourcesJar(type: Jar) {
-	classifier = 'sources'
-	from android.sourceSets.main.java.srcDirs
+task sourceJar(type: Jar) {
+	from sourceSets.main.allJava
+	classifier "sources"
 }
 
 publishing {
 	publications {
 		maven(MavenPublication) {
-			//groupId 'cz.example'
-			//artifactId 'custom-artifact'
-			//version = android.defaultConfig.versionName
 
-			artifact bundleReleaseAar
-			artifact androidJavadocsJar
-			artifact androidSourcesJar
+			from components.java
+			artifact sourceJar
 
 			pom.withXml {
 				final dependenciesNode = asNode().appendNode('dependencies')
