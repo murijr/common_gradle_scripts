@@ -2,6 +2,6 @@ apply plugin: 'net.researchgate.release'
 
 release {
 
-    return
+    return false
     
 }
