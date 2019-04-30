@@ -15,22 +15,16 @@ private Boolean isValid() {
 }
 
 uploadArchives {
-	// Exemplo de repo url "packagecloud+https://packagecloud.io/Amauri/release"
 
 	if(!isValid()) return
 
-	def libVersion = project.version
 	def repositoryURL = project.property('repository_url')
 	def authPassword = project.property('auth_password')
-
-	if (!project.hasProperty('release')) {
-		libVersion = "${project.version}-SNAPSHOT"
-	}
 
 	repositories.mavenDeployer {
 		pom.groupId = project.group
 		pom.artifactId = project.name
-		pom.version = libVersion
+		pom.version = project.version
 		configuration = configurations.deployerJars
 		repository(url: repositoryURL) {
 			authentication(password: authPassword)
