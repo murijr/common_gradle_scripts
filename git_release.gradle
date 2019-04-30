@@ -1,0 +1,13 @@
+buildscript {
+    repositories { jcenter() }
+    dependencies {
+        classpath 'com.netflix.nebula:nebula-release-plugin:6.3.5'
+    }
+}
+
+apply plugin: 'nebula.release'
+
+nebulaRelease {
+    Set<String> releaseBranchPatterns = [/master/] as Set
+    tasks.release.dependsOn tasks.uploadArchives
+}
