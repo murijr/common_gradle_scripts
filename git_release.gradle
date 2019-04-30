@@ -1,13 +1,5 @@
-buildscript {
-    repositories { jcenter() }
-    dependencies {
-        classpath 'com.netflix.nebula:nebula-release-plugin:6.3.5'
-    }
-}
+apply plugin: 'net.researchgate.release'
 
-apply plugin: 'nebula.release'
+release {
 
-nebulaRelease {
-    Set<String> releaseBranchPatterns = [/master/] as Set
-    tasks.release.dependsOn tasks.uploadArchives
 }
