@@ -15,6 +15,10 @@ dependencies {
 	deployerJars "io.packagecloud.maven.wagon:maven-packagecloud-wagon:0.0.6"
 }
 
+private String getArtifactId() {
+	return artifactIdMap.get(project.name, project.name)
+}
+
 private void validateParams() {
 
 	if(!project.hasProperty('repository_url')) {
@@ -57,7 +61,7 @@ uploadArchives {
 
 	repositories.mavenDeployer {
 		pom.groupId = project.group
-		pom.artifactId = project.name
+		pom.artifactId = getArtifactId()
 		pom.version = version
 		configuration = configurations.deployerJars
 		repository(url: repositoryURL) {
@@ -77,29 +81,28 @@ uploadArchives {
 		}
 
 	}
-
 }
 
 publishing {
 	publications {
-		aar(MavenPublication) {
-			groupId project.group
-			artifactId project.name
+		lib(MavenPublication) {
+			groupId(project.group)
+			artifactId(getArtifactId())
 			version project.version
 
-			artifact(sourceJar)
-
 			if (project.plugins.hasPlugin("com.android.library")) {
-				artifact "${project.buildDir}/outputs/aar/${project.name}-release.aar"
+				artifact "${project.buildDir}/outputs/aar/${getArtifactId()}-release.aar"
 			} else {
-				artifact "${project.buildDir}/libs/${project.name}-${project.version}.jar"
+				artifact "${project.buildDir}/libs/${getArtifactId()}-${project.version}.jar"
 			}
 
 			pom.withXml {
 				def dependenciesNode = asNode().appendNode('dependencies')
 				configurations.implementation.allDependencies.each {
-					if(it.group != null && (it.name != null || "unspecified" == it.name) && it.version != null)
-					{
+					if((it.group != null || "unspecified" == it.group) &&
+							(it.name != null || "unspecified" == it.name) &&
+							(it.version != null || !it.version.isEmpty() || "unspecified" != it.version)) {
+
 						def dependencyNode = dependenciesNode.appendNode('dependency')
 						dependencyNode.appendNode('groupId', it.group)
 						dependencyNode.appendNode('artifactId', it.name)
