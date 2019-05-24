@@ -1,9 +1,83 @@
 apply plugin: 'maven-publish'
+apply plugin: 'maven'
 
 task sourceJar(type: Jar) {
 	from "src/main/java"
 	from "src/main/kotlin"
 	classifier = 'sources'
+}
+
+configurations {
+	deployerJars
+}
+
+dependencies {
+	deployerJars "io.packagecloud.maven.wagon:maven-packagecloud-wagon:0.0.6"
+}
+
+private void validateParams() {
+
+	if(!project.hasProperty('repository_url')) {
+		throw new Exception("repository_url property is required")
+	}
+
+	if(!project.hasProperty('base_version')) {
+		throw new Exception("base_version property is required")
+	}
+
+	if(!project.hasProperty('sufix_version')) {
+		throw new Exception("sufix_version property is required")
+	}
+
+	if(!project.hasProperty('auth_password')) {
+		throw new Exception("auth_password property is required")
+	}
+
+}
+
+private void validateVersion() {
+
+	if(project.property('base_version') != project.version) {
+		throw new Exception("The version passed by parameter must be equal to the version of the artifact")
+	}
+
+}
+
+uploadArchives {
+
+	if (!project.gradle.startParameter.taskNames.contains("uploadArchives")) return
+
+	validateParams()
+
+	validateVersion()
+
+	def repositoryURL = project.property('repository_url')
+	def authPassword = project.property('auth_password')
+	def version = "${project.version}${project.property('sufix_version')}"
+
+	repositories.mavenDeployer {
+		pom.groupId = project.group
+		pom.artifactId = project.name
+		pom.version = version
+		configuration = configurations.deployerJars
+		repository(url: repositoryURL) {
+			authentication(password: authPassword)
+		}
+
+		pom.whenConfigured { pom ->
+			println("Current Dependencies ${pom.dependencies}")
+			pom.dependencies.each { dep ->
+				println("Processing ${dep}")
+				if (dep.getGroupId() == project.group && artifactIdMap.containsValue(dep.getArtifactId())) {
+					println("Updating Dependencies")
+					dep.setVersion(version)
+					println("Updated ${dep}")
+				}
+			}
+		}
+
+	}
+
 }
 
 publishing {
